@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>校验结果</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans","PingFang SC","Microsoft YaHei";margin:0;background:#fafafa;color:#111}
+    .wrap{max-width:720px;margin:0 auto;padding:28px 18px}
+    .card{background:#fff;border:1px solid #eee;border-radius:14px;padding:22px;box-shadow:0 1px 10px rgba(0,0,0,.03)}
+    h1{font-size:20px;margin:0 0 10px}
+    .tag{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:#f2f2f2;color:#333;margin:6px 0 14px}
+    .p{line-height:1.75;font-size:15px;margin:10px 0}
+    .small{color:#666;font-size:13px;line-height:1.6;margin-top:14px}
+    .hr{height:1px;background:#eee;margin:16px 0}
+    button{border:1px solid #ddd;background:#fff;border-radius:10px;padding:10px 12px;font-size:14px;cursor:pointer}
+    button:active{transform:translateY(1px)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    code{background:#f4f4f5;padding:2px 6px;border-radius:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1 id="title">校验结果</h1>
+      <div class="tag" id="modeTag">mode=</div>
+
+      <div id="content"></div>
+
+      <div class="hr"></div>
+
+      <div class="small" id="footer">
+        本页为系统自动输出，目的仅为“是否继续投入”的风险校准。此处不提供建议、不解释、不对结果负责。
+      </div>
+
+      <div class="btns">
+        <button id="copyBtn">复制结果编号</button>
+        <button id="closeBtn">关闭本页</button>
+      </div>
+
+      <div class="small" id="debug" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    // 读取 URL 参数
+    const params = new URLSearchParams(location.search);
+    const mode = (params.get("mode") || "unknown").trim();
+    const token = (params.get("t") || params.get("token") || "").trim(); // 可选：将来你要透传也有位
+
+    // 文案库（先给最小可用壳子，你后面可以把每段替换成你的正式文案）
+    const LIB = {
+      pass: {
+        title: "通过（低风险）",
+        body: `
+          <div class="p"><b>当前信号：</b>未触发明显“决策自毁/不可逆风险”模式。</div>
+          <div class="p"><b>系统动作：</b>允许你继续推进，但建议你仍然按“最小动作 + 可撤回”原则行动。</div>
+          <div class="p"><b>断裂式结束：</b>本系统到此为止，不提供下一步建议。</div>
+        `
+      },
+      M1: {
+        title: "M1｜高概率自毁结构",
+        body: `
+          <div class="p"><b>当前信号：</b>你可能在用“冲动/逃避/证明”驱动决策。</div>
+          <div class="p"><b>系统动作：</b>建议立即停止推进本决策，先回到现实约束（钱/时间/关系/不可逆）。</div>
+          <div class="p"><b>断裂式结束：</b>本系统不提供解释与替代方案。</div>
+        `
+      },
+      M2: {
+        title: "M2｜高概率误判结构",
+        body: `
+          <div class="p"><b>当前信号：</b>你可能缺少关键事实或把“想要”当成“会发生”。</div>
+          <div class="p"><b>系统动作：</b>建议暂停，补齐最小事实，再重新填写一次。</div>
+          <div class="p"><b>断裂式结束：</b>本系统不提供如何补事实的路径。</div>
+        `
+      },
+      M3: {
+        title: "M3｜资源/边界失衡结构",
+        body: `
+          <div class="p"><b>当前信号：</b>这件事可能会吃掉你超出预期的精力/责任/时间，导致长期失衡。</div>
+          <div class="p"><b>系统动作：</b>建议不要在当前状态继续投入。</div>
+          <div class="p"><b>断裂式结束：</b>本系统不提供边界谈判与执行方案。</div>
+        `
+      },
+      M4: {
+        title: "M4｜不可逆风险偏高结构",
+        body: `
+          <div class="p"><b>当前信号：</b>一旦开始推进，可能出现你无法撤回或无法承受的后果。</div>
+          <div class="p"><b>系统动作：</b>建议停止推进，或把行动压到“可撤回的最小实验”。</div>
+          <div class="p"><b>断裂式结束：</b>本系统不对后果做背书。</div>
+        `
+      },
+      M5: {
+        title: "M5｜复杂耦合/高不确定结构",
+        body: `
+          <div class="p"><b>当前信号：</b>变量过多、链条过长，现实反馈不足以支撑继续下注。</div>
+          <div class="p"><b>系统动作：</b>建议暂停推进，降低复杂度后再来一次。</div>
+          <div class="p"><b>断裂式结束：</b>本系统不提供降复杂度的设计。</div>
+        `
+      },
+      unknown: {
+        title: "无法识别的结果编号",
+        body: `
+          <div class="p">未识别到 <code>mode</code> 参数。</div>
+          <div class="p">请使用形如：<code>/r/?mode=M1</code> 或 <code>/r/?mode=pass</code> 的链接。</div>
+        `
+      }
+    };
+
+    const data = LIB[mode] || LIB.unknown;
+
+    // 渲染
+    document.getElementById("title").innerText = data.title;
+    document.getElementById("modeTag").innerText = "mode=" + mode;
+    document.getElementById("content").innerHTML = data.body;
+
+    // 复制按钮：只复制结果编号（断裂式结束，不复制长文）
+    document.getElementById("copyBtn").addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(mode);
+        document.getElementById("copyBtn").innerText = "已复制：" + mode;
+        setTimeout(()=>document.getElementById("copyBtn").innerText="复制结果编号", 1200);
+      } catch(e) {
+        alert("复制失败，你可以手动复制： " + mode);
+      }
+    });
+
+    // 关闭按钮：尽量关闭；关不了就返回上一页
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      window.close();
+      setTimeout(()=>history.back(), 150);
+    });
+
+    // 可选调试信息（默认隐藏）
+    // document.getElementById("debug").style.display = "block";
+    // document.getElementById("debug").innerText = `token=${token || "(空)"}`;
+  </script>
+</body>
+</html>
