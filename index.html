@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>决策前风险校验</title>
+</head>
+<body>
+  <p style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 16px;">
+    正在进入问卷…
+  </p>
+
+  <script>
+    // 生成 token（优先用 randomUUID，兼容不支持的浏览器则 fallback）
+    function genToken() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+      return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
+    }
+
+    const token = genToken();
+
+    // ✅ 这里替换成你的 SeaTable 在线表单链接
+    const SEATABLE_FORM_URL = "https://cloud.seatable.cn/dtable/forms/cb0c201f-f66a-4bf6-b0a6-35172e7ea645/";
+
+    // 预填 token 字段：?token=xxxx
+    const url = new URL(SEATABLE_FORM_URL);
+    url.searchParams.set("token", token);
+
+    // 跳转
+    window.location.replace(url.toString());
+  </script>
+</body>
+</html>
