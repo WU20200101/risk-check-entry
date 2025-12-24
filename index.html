@@ -27,9 +27,10 @@
     const url = new URL(SEATABLE_FORM_URL);
     url.searchParams.set("prefill_token", token);
 
-    window.location.replace(url.toString());
+    window.location.href = url.toString();
   </script>
 </body>
 </html>
+
 
 
