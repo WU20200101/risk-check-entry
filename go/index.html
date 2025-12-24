@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>跳转中…</title>
+  <meta name="robots" content="noindex,nofollow" />
+</head>
+<body>
+  <div id="msg">跳转中…</div>
+
+  <script>
+    const FORM_URL = "https://cloud.seatable.cn/dtable/forms/cb0c201f-f66a-4bf6-b0a6-35172e7ea645/";
+
+    const params = new URLSearchParams(location.search);
+    const token = (params.get("t") || params.get("token") || "").trim();
+
+    if (!token) {
+      document.getElementById("msg").innerText = "缺少 token，无法跳转。请用 /go/?t=你的token";
+    } else {
+      const target = new URL(FORM_URL);
+      target.searchParams.set("prefill_token", token);
+      location.replace(target.toString());
+    }
+  </script>
+</body>
+</html>
