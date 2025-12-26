@@ -23,7 +23,8 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1 id="title">校验结果</h1>
+      <h1 id="mainTitle">已识别到高风险决策结构</h1>
+      <div class="tag" id="subTitle"></div>
       <div class="tag" id="modeTag">mode=</div>
 
       <div id="content"></div>
@@ -50,55 +51,96 @@
     const token = (params.get("t") || params.get("token") || "").trim(); // 可选：将来你要透传也有位
 
     // 文案库（先给最小可用壳子，你后面可以把每段替换成你的正式文案）
-    const LIB = {
-      pass: {
-        title: "通过（低风险）",
-        body: `
-          <div class="p"><b>当前信号：</b>未触发明显“决策自毁/不可逆风险”模式。</div>
-          <div class="p"><b>系统动作：</b>允许你继续推进，但建议你仍然按“最小动作 + 可撤回”原则行动。</div>
-          <div class="p"><b>断裂式结束：</b>本系统到此为止，不提供下一步建议。</div>
-        `
-      },
-      M1: {
-        title: "M1｜高概率自毁结构",
-        body: `
-          <div class="p"><b>当前信号：</b>你可能在用“冲动/逃避/证明”驱动决策。</div>
-          <div class="p"><b>系统动作：</b>建议立即停止推进本决策，先回到现实约束（钱/时间/关系/不可逆）。</div>
-          <div class="p"><b>断裂式结束：</b>本系统不提供解释与替代方案。</div>
-        `
-      },
-      M2: {
-        title: "M2｜高概率误判结构",
-        body: `
-          <div class="p"><b>当前信号：</b>你可能缺少关键事实或把“想要”当成“会发生”。</div>
-          <div class="p"><b>系统动作：</b>建议暂停，补齐最小事实，再重新填写一次。</div>
-          <div class="p"><b>断裂式结束：</b>本系统不提供如何补事实的路径。</div>
-        `
-      },
-      M3: {
-        title: "M3｜资源/边界失衡结构",
-        body: `
-          <div class="p"><b>当前信号：</b>这件事可能会吃掉你超出预期的精力/责任/时间，导致长期失衡。</div>
-          <div class="p"><b>系统动作：</b>建议不要在当前状态继续投入。</div>
-          <div class="p"><b>断裂式结束：</b>本系统不提供边界谈判与执行方案。</div>
-        `
-      },
-      M4: {
-        title: "M4｜不可逆风险偏高结构",
-        body: `
-          <div class="p"><b>当前信号：</b>一旦开始推进，可能出现你无法撤回或无法承受的后果。</div>
-          <div class="p"><b>系统动作：</b>建议停止推进，或把行动压到“可撤回的最小实验”。</div>
-          <div class="p"><b>断裂式结束：</b>本系统不对后果做背书。</div>
-        `
-      },
-      M5: {
-        title: "M5｜复杂耦合/高不确定结构",
-        body: `
-          <div class="p"><b>当前信号：</b>变量过多、链条过长，现实反馈不足以支撑继续下注。</div>
-          <div class="p"><b>系统动作：</b>建议暂停推进，降低复杂度后再来一次。</div>
-          <div class="p"><b>断裂式结束：</b>本系统不提供降复杂度的设计。</div>
-        `
-      },
+const LIB = {
+  M1: {
+    label: "M1｜状态驱动型",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      当前决策中，存在由情绪缓解、关系压力或自我证明需求主导判断的迹象。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      在当前状态下继续推进该决策，出现不可逆后果或长期负担的风险较高。
+      是否继续，建议先重新核对现实约束（资金 / 时间 / 关系 / 可撤回性）。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不提供解释与替代方案。</div>
+    `
+  },
+
+  M2: {
+    label: "M2｜信息不足型",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      当前决策依赖的关键信息不足，部分判断建立在假设或未验证条件之上。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      在信息未充分确认前继续推进，误判风险较高。
+      是否继续，建议先补齐对结果影响最大的关键事实。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不提供信息获取路径与决策建议。</div>
+    `
+  },
+
+  M3: {
+    label: "M3｜资源失衡型",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      当前决策在时间、精力或责任分配上存在持续性失衡迹象。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      在资源结构未校准前继续推进，可能对其他重要领域造成连锁影响。
+      是否继续，建议先评估长期可承受性。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不提供资源分配或执行方案。</div>
+    `
+  },
+
+  M4: {
+    label: "M4｜高不可逆型",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      该决策一旦启动，存在较高的不可逆特征，退出或修正成本较大。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      在缺乏清晰撤回边界的情况下继续推进，可能放大单次判断失误的影响。
+      是否继续，建议先明确失败成本。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不对后果承担责任。</div>
+    `
+  },
+
+  M5: {
+    label: "M5｜复杂耦合型",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      当前决策涉及变量较多，因果链条较长，反馈不足以支撑稳定判断。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      在复杂度未压缩前继续推进，结果波动性较高。
+      是否继续，建议先降低复杂度或拆分决策单元。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不提供复杂性管理方案。</div>
+    `
+  },
+
+  pass: {
+    label: "PASS｜未识别到显著高风险结构",
+    body: `
+      <div class="p"><b>系统识别到的信号：</b><br>
+      当前决策未触发明显的高风险决策结构特征。</div>
+
+      <div class="p"><b>系统提示：</b><br>
+      这不代表结果可控，仅表示未识别到需要立即刹车的结构性风险。
+      是否继续，由你自行判断。</div>
+
+      <div class="p"><b>断裂式结束：</b><br>
+      本系统不对后续结果负责。</div>
+    `
+  },
       unknown: {
         title: "无法识别的结果编号",
         body: `
@@ -111,7 +153,7 @@
     const data = LIB[mode] || LIB.unknown;
 
     // 渲染
-    document.getElementById("title").innerText = data.title;
+    document.getElementById("subTitle").innerText = data.title;
     document.getElementById("modeTag").innerText = "mode=" + mode;
     document.getElementById("content").innerHTML = data.body;
 
