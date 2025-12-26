@@ -31,11 +31,10 @@
       <div class="hr"></div>
 
       <div class="small" id="footer">
-        本页为系统自动输出，目的仅为“是否继续投入”的风险校准。此处不提供建议、不解释、不对结果负责。
+        本页为系统自动输出，目的仅为“是否继续投入”的风险校准。此处不提供建议、不解释、不对结果负责。阅读后请自行关闭。
       </div>
 
       <div class="btns">
-        <button id="copyBtn">复制结果编号</button>
         <button id="closeBtn">关闭本页</button>
       </div>
 
@@ -155,16 +154,6 @@ const LIB = {
     document.getElementById("modeTag").innerText = "mode=" + mode;
     document.getElementById("content").innerHTML = data.body;
 
-    // 复制按钮：只复制结果编号（断裂式结束，不复制长文）
-    document.getElementById("copyBtn").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(mode);
-        document.getElementById("copyBtn").innerText = "已复制：" + mode;
-        setTimeout(()=>document.getElementById("copyBtn").innerText="复制结果编号", 1200);
-      } catch(e) {
-        alert("复制失败，你可以手动复制： " + mode);
-      }
-    });
 
     // 关闭按钮：尽量关闭；关不了就返回上一页
     document.getElementById("closeBtn").addEventListener("click", () => {
