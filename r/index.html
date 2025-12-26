@@ -24,7 +24,6 @@
   <div class="wrap">
     <div class="card">
       <h1 id="mainTitle">已识别到高风险决策结构</h1>
-      <div class="tag" id="subTitle"></div>
       <div class="tag" id="modeTag">mode=</div>
 
       <div id="content"></div>
@@ -153,7 +152,6 @@ const LIB = {
     const data = LIB[mode] || LIB.unknown;
 
     // 渲染
-    document.getElementById("subTitle").innerText = data.title;
     document.getElementById("modeTag").innerText = "mode=" + mode;
     document.getElementById("content").innerHTML = data.body;
 
