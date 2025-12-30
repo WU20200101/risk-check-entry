@@ -23,7 +23,7 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <h1 id="mainTitle">已识别到高风险决策结构</h1>
+      <h1 id="mainTitle"></h1>
       <div class="tag" id="subTitle"></div>
 
       <div id="content"></div>
@@ -51,6 +51,7 @@
     // 文案库（先给最小可用壳子，你后面可以把每段替换成你的正式文案）
 const LIB = {
   M1: {
+    title: "已识别到高风险决策结构",
     label: "M1｜状态驱动型",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -68,6 +69,7 @@ const LIB = {
   },
 
   M2: {
+    title: "已识别到高风险决策结构",
     label: "M2｜信息不足型",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -85,6 +87,7 @@ const LIB = {
   },
 
   M3: {
+    title: "已识别到高风险决策结构",
     label: "M3｜资源失衡型",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -102,6 +105,7 @@ const LIB = {
   },
 
   M4: {
+    title: "已识别到高风险决策结构",
     label: "M4｜高不可逆型",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -119,6 +123,7 @@ const LIB = {
   },
 
   M5: {
+    title: "已识别到高风险决策结构",
     label: "M5｜复杂耦合型",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -136,6 +141,7 @@ const LIB = {
   },
 
   pass: {
+    title: "未识别到显著高风险结构",
     label: "PASS｜未识别到显著高风险结构",
     body: `
       <div class="p"><b>系统识别到的信号：</b><br>
@@ -165,6 +171,7 @@ const LIB = {
     // 渲染
     document.getElementById("subTitle").innerText = data.label;
     document.getElementById("content").innerHTML = data.body;
+    document.getElementById("mainTitle").innerText = data.title;
 
 
     // 关闭按钮：尽量关闭；关不了就返回上一页
